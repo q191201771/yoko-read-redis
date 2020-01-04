@@ -38,10 +38,12 @@
 #ifndef __DICT_H
 #define __DICT_H
 
+// dict模块中，使用int类型作为函数操作结果的返回值，成功或失败的宏定义
 #define DICT_OK 0
 #define DICT_ERR 1
 
 /* Unused arguments generate annoying warnings... */
+// 避免未使用的参数报编译警告
 #define DICT_NOTUSED(V) ((void) V)
 
 typedef struct dictEntry {
@@ -51,34 +53,35 @@ typedef struct dictEntry {
         uint64_t u64;
         int64_t s64;
         double d;
-    } v;
-    struct dictEntry *next;
+    } v; // value除了可以是void *类型，还可以是其他基础类型
+    struct dictEntry *next; // hash冲突采用链地址法，所以同一个桶上有多个key时，用链表串连
 } dictEntry;
 
+// 钩子函数
 typedef struct dictType {
-    uint64_t (*hashFunction)(const void *key);
-    void *(*keyDup)(void *privdata, const void *key);
-    void *(*valDup)(void *privdata, const void *obj);
-    int (*keyCompare)(void *privdata, const void *key1, const void *key2);
-    void (*keyDestructor)(void *privdata, void *key);
-    void (*valDestructor)(void *privdata, void *obj);
+    uint64_t (*hashFunction)(const void *key); // 哈希函数，如何将key转换成hash code，必须指定
+    void *(*keyDup)(void *privdata, const void *key); // key放入dict时，是否需要深拷贝，可以不指定
+    void *(*valDup)(void *privdata, const void *obj); // value放入dict时，是否需要深拷贝，可以不指定
+    int (*keyCompare)(void *privdata, const void *key1, const void *key2); // key比较函数，如果不指定，则直接比较指针地址，一般要指定
+    void (*keyDestructor)(void *privdata, void *key); // dict释放Entry key时，是否需要调用额外析构函数，可以不指定
+    void (*valDestructor)(void *privdata, void *obj); // dict释放Entry value时，是否需要调用额外析构函数，可以不指定
 } dictType;
 
 /* This is our hash table structure. Every dictionary has two of this as we
  * implement incremental rehashing, for the old to the new table. */
 typedef struct dictht {
-    dictEntry **table;
-    unsigned long size;
-    unsigned long sizemask;
-    unsigned long used;
+    dictEntry **table; // 二维，第一维是桶数组，每个桶中存放的是entry链表
+    unsigned long size; // 哈希表的桶数量
+    unsigned long sizemask; // 等于当前桶数量减1，这里有个优化点，取桶下标的方法不是取余，而是使用与运算，因为size是2的幂方
+    unsigned long used; // 整个哈希表中存放的元素个数，注意，一个桶中如果有多个元素，used也算多个，所以used可能大于桶数量
 } dictht;
 
 typedef struct dict {
-    dictType *type;
-    void *privdata;
-    dictht ht[2];
-    long rehashidx; /* rehashing not in progress if rehashidx == -1 */
-    unsigned long iterators; /* number of iterators currently running */
+    dictType *type; // 钩子函数
+    void *privdata; // 使用者传入的指针，后续的一些回调会原样返回给使用者
+    dictht ht[2]; // dict中实际上有两个hash表，是为了rehash时可以分步进行
+    long rehashidx; // -1 表示不在进行rehash，不为-1时，表示正在rehash，rehashidx的值即为正在迁移的桶下标
+    unsigned long iterators; // 迭代器的数量 /* number of iterators currently running */
 } dict;
 
 /* If safe is set to 1 this is a safe iterator, that means, you can call
@@ -97,7 +100,7 @@ typedef struct dictIterator {
 typedef void (dictScanFunction)(void *privdata, const dictEntry *de);
 typedef void (dictScanBucketFunction)(void *privdata, dictEntry **bucketref);
 
-/* This is the initial size of every hash table */
+// hash表的最小桶个数
 #define DICT_HT_INITIAL_SIZE     4
 
 /* ------------------------------- Macros ------------------------------------*/
@@ -143,24 +146,25 @@ typedef void (dictScanBucketFunction)(void *privdata, dictEntry **bucketref);
 #define dictGetSignedIntegerVal(he) ((he)->v.s64)
 #define dictGetUnsignedIntegerVal(he) ((he)->v.u64)
 #define dictGetDoubleVal(he) ((he)->v.d)
-#define dictSlots(d) ((d)->ht[0].size+(d)->ht[1].size)
-#define dictSize(d) ((d)->ht[0].used+(d)->ht[1].used)
-#define dictIsRehashing(d) ((d)->rehashidx != -1)
+#define dictSlots(d) ((d)->ht[0].size+(d)->ht[1].size) // 两个哈希表的桶个数之和
+#define dictSize(d) ((d)->ht[0].used+(d)->ht[1].used) // dict中的元素总个数
+#define dictIsRehashing(d) ((d)->rehashidx != -1) // 是否处于rehash阶段
 
 /* API */
-dict *dictCreate(dictType *type, void *privDataPtr);
-int dictExpand(dict *d, unsigned long size);
-int dictAdd(dict *d, void *key, void *val);
+// 以下函数见实现中的说明
+dict *dictCreate(dictType *type, void *privDataPtr); // 创建dict
+int dictExpand(dict *d, unsigned long size); // 对dict的桶数量扩容
+int dictAdd(dict *d, void *key, void *val); // 向dict中添加键值对
 dictEntry *dictAddRaw(dict *d, void *key, dictEntry **existing);
 dictEntry *dictAddOrFind(dict *d, void *key);
 int dictReplace(dict *d, void *key, void *val);
-int dictDelete(dict *d, const void *key);
+int dictDelete(dict *d, const void *key); // 删除指定的key
 dictEntry *dictUnlink(dict *ht, const void *key);
 void dictFreeUnlinkedEntry(dict *d, dictEntry *he);
 void dictRelease(dict *d);
-dictEntry * dictFind(dict *d, const void *key);
+dictEntry * dictFind(dict *d, const void *key); // 查找指定的key
 void *dictFetchValue(dict *d, const void *key);
-int dictResize(dict *d);
+int dictResize(dict *d); // shrink至合适大小
 dictIterator *dictGetIterator(dict *d);
 dictIterator *dictGetSafeIterator(dict *d);
 dictEntry *dictNext(dictIterator *iter);
@@ -174,7 +178,7 @@ void dictEmpty(dict *d, void(callback)(void*));
 void dictEnableResize(void);
 void dictDisableResize(void);
 int dictRehash(dict *d, int n);
-int dictRehashMilliseconds(dict *d, int ms);
+int dictRehashMilliseconds(dict *d, int ms); // 开始rehash，并指定本次rehash的限定时长
 void dictSetHashFunctionSeed(uint8_t *seed);
 uint8_t *dictGetHashFunctionSeed(void);
 unsigned long dictScan(dict *d, unsigned long v, dictScanFunction *fn, dictScanBucketFunction *bucketfn, void *privdata);

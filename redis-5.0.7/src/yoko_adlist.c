@@ -131,6 +131,7 @@ list *listAddNodeTail(list *list, void *value)
     return list;
 }
 
+// param after: 为0表示在插入在指定节点<old_node>之前，非0表示插入在指定节点之后
 list *listInsertNode(list *list, listNode *old_node, void *value, int after) {
     listNode *node;
 
@@ -183,6 +184,7 @@ void listDelNode(list *list, listNode *node)
  * call to listNext() will return the next element of the list.
  *
  * This function can't fail. */
+// param direction: 为AL_START_HEAD表示从头节点开始往后遍历，为其他值标识从尾节点向前遍历
 listIter *listGetIterator(list *list, int direction)
 {
     listIter *iter;
@@ -202,11 +204,13 @@ void listReleaseIterator(listIter *iter) {
 }
 
 /* Create an iterator in the list private iterator structure */
+// 将迭代器重置到头部，之后可以顺序遍历链表
 void listRewind(list *list, listIter *li) {
     li->next = list->head;
     li->direction = AL_START_HEAD;
 }
 
+// 将迭代器重置到尾部，之后可以倒序遍历链表
 void listRewindTail(list *list, listIter *li) {
     li->next = list->tail;
     li->direction = AL_START_TAIL;
@@ -226,6 +230,8 @@ void listRewindTail(list *list, listIter *li) {
  * }
  *
  * */
+// 返回迭代器当前迭代的节点，并将迭代器移动到下一个位置
+// 返回的节点可以自由操作，可以删除
 listNode *listNext(listIter *iter)
 {
     listNode *current = iter->next;
@@ -247,6 +253,7 @@ listNode *listNext(listIter *iter)
  * the original node is used as value of the copied node.
  *
  * The original list both on success or error is never modified. */
+// 拷贝链表
 list *listDup(list *orig)
 {
     list *copy;
@@ -287,6 +294,7 @@ list *listDup(list *orig)
  * On success the first matching node pointer is returned
  * (search starts from head). If no matching node exists
  * NULL is returned. */
+// 从头部开始搜索，返回第一个匹配的节点
 listNode *listSearchKey(list *list, void *key)
 {
     listIter iter;
@@ -312,6 +320,7 @@ listNode *listSearchKey(list *list, void *key)
  * and so on. Negative integers are used in order to count
  * from the tail, -1 is the last element, -2 the penultimate
  * and so on. If the index is out of range NULL is returned. */
+// 返回链表的第<index>个节点，正数表示顺序访问，0为头部第一个节点，负数表示倒序访问，-1位尾部第一个节点
 listNode *listIndex(list *list, long index) {
     listNode *n;
 
@@ -327,6 +336,7 @@ listNode *listIndex(list *list, long index) {
 }
 
 /* Rotate the list removing the tail node and inserting it to the head. */
+// 将最尾部的节点移动到头部
 void listRotate(list *list) {
     listNode *tail = list->tail;
 
@@ -344,6 +354,7 @@ void listRotate(list *list) {
 
 /* Add all the elements of the list 'o' at the end of the
  * list 'l'. The list 'other' remains empty but otherwise valid. */
+// 将<o>链表的所有节点拼接到<l>之后，拼接完成之后，<o>链表会被清空
 void listJoin(list *l, list *o) {
     if (o->head)
         o->head->prev = l->tail;
