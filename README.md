@@ -4,12 +4,10 @@ redis 源码阅读，基于`redis 5.0.7`。
 
 源码目录为`/redis-5.0.7/src`。
 
-阅读完的代码文件，我会给文件名添加前缀`yoko_`，比如`adlist.c -> yoko_adlist.c`
-
 底层基础数据结构：
 
 | 文件名 | 进度 |
 | - | - |
 | dict.c[.h] | 95% |
 | adlist.c[.h] | 100% |
-| sds.c[.h] | working |
+| sds.c[.h] / sdsalloc.h | working |
