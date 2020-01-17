@@ -36,6 +36,7 @@
  * the include of your alternate allocator if needed (not needed in order
  * to use the default libc allocator). */
 
+// 对申请释放内存增加一层间接层
 #include "zmalloc.h"
 #define s_malloc zmalloc
 #define s_realloc zrealloc

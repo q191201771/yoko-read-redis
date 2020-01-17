@@ -239,6 +239,7 @@ void zmalloc_set_oom_handler(void (*oom_handler)(size_t)) {
 #include <sys/stat.h>
 #include <fcntl.h>
 
+// 直接从 /proc/<pid>/stat 中读取
 size_t zmalloc_get_rss(void) {
     int page = sysconf(_SC_PAGESIZE);
     size_t rss;
@@ -279,6 +280,7 @@ size_t zmalloc_get_rss(void) {
 #include <mach/task.h>
 #include <mach/mach_init.h>
 
+// __APPLE__ 平台
 size_t zmalloc_get_rss(void) {
     task_t task = MACH_PORT_NULL;
     struct task_basic_info t_info;
@@ -291,6 +293,7 @@ size_t zmalloc_get_rss(void) {
     return t_info.resident_size;
 }
 #else
+// 未知平台，返回 zmalloc_used_memory 的结果
 size_t zmalloc_get_rss(void) {
     /* If we can't get the RSS in an OS-specific way for this system just
      * return the memory usage we estimated in zmalloc()..

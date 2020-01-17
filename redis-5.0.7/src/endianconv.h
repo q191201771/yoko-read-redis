@@ -43,6 +43,7 @@ uint16_t intrev16(uint16_t v);
 uint32_t intrev32(uint32_t v);
 uint64_t intrev64(uint64_t v);
 
+// 只有本地是大端时，才将输入数据转换成小端，如果已经小端，啥也不干
 /* variants of the function doing the actual conversion only if the target
  * host is big endian */
 #if (BYTE_ORDER == LITTLE_ENDIAN)
@@ -61,6 +62,7 @@ uint64_t intrev64(uint64_t v);
 #define intrev64ifbe(v) intrev64(v)
 #endif
 
+// 转成网络字节序，网络字节序是大端
 /* The functions htonu64() and ntohu64() convert the specified value to
  * network byte ordering and back. In big endian systems they are no-ops. */
 #if (BYTE_ORDER == BIG_ENDIAN)

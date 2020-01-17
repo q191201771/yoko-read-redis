@@ -31,6 +31,8 @@
 #ifndef __ZMALLOC_H
 #define __ZMALLOC_H
 
+// 对申请释放堆内存的封装，可选择tcmalloc、jemalloc等实现
+
 /* Double expansion needed for stringification of macro values. */
 #define __xstr(s) __str(s)
 #define __str(s) #s
@@ -77,18 +79,27 @@
 #define HAVE_DEFRAG
 #endif
 
-void *zmalloc(size_t size);
-void *zcalloc(size_t size);
-void *zrealloc(void *ptr, size_t size);
-void zfree(void *ptr);
-char *zstrdup(const char *s);
-size_t zmalloc_used_memory(void);
+void *zmalloc(size_t size); // 申请<size>大小内存
+void *zcalloc(size_t size); // 申请<size>大小内存，并全部初始化为0
+void *zrealloc(void *ptr, size_t size); // 确保ptr有size大小的空间，如果不够，内部会申请新内存，具体可以man realloc
+void zfree(void *ptr); // 释放内存
+char *zstrdup(const char *s); // 拷贝<s>，内存由内部申请，拷贝<s>直到遇到`\0`
+size_t zmalloc_used_memory(void); // 通过zmalloc模块总申请的内存大小
+
+// oom 即 out of memory
+// 设置内存申请失败时的回调函数，如果不设置，默认处理函数是往strerr打印一条日志
 void zmalloc_set_oom_handler(void (*oom_handler)(size_t));
+
+// 获取当前进程所使用的常驻内存大小，不同平台实现不同
 size_t zmalloc_get_rss(void);
+// 只在使用jemalloc时有效
 int zmalloc_get_allocator_info(size_t *allocated, size_t *active, size_t *resident);
 size_t zmalloc_get_private_dirty(long pid);
+// 获取指定进程smap中的指定字段的值，如果pid为-1，则获取自身进程
 size_t zmalloc_get_smap_bytes_by_field(char *field, long pid);
+// 获取物理内存大小
 size_t zmalloc_get_memory_size(void);
+// 释放指针指向内存
 void zlibc_free(void *ptr);
 
 #ifdef HAVE_DEFRAG

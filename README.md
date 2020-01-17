@@ -8,6 +8,14 @@
 
 | 文件名 | 进度 | 简述 |
 | - | - | - |
-| dict.c[.h] | 95% | 底层基础数据结构 字典，哈希表 |
-| adlist.c[.h] | 100% | 底层基础数据结构 双向链表 |
-| sds.c[.h] / sdsalloc.h | working |
+| dict.c[.h] | 95% | 底层基础数据结构，字典，基于哈希表实现 |
+| adlist.c[.h] | 100% | 底层基础数据结构，双向链表 |
+| sds.c[.h] | 80% | xxx |
+| sdsalloc.h | 80% | xxx |
+| zmalloc.c[.h] | 80% | xxx |
+| intset.c[.h] | 95% | xxx |
+| endianconv.c[.h] | 95% | 大小端相关 |
+
+相关文章：
+
+- [redis源码阅读之面向哈希表优化](https://pengrl.com/p/20010/)
