@@ -32,7 +32,7 @@
 #include <sys/epoll.h>
 
 typedef struct aeApiState {
-    int epfd;
+    int epfd; // epoll对象
     struct epoll_event *events;
 } aeApiState;
 

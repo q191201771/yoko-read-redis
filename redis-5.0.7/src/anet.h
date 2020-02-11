@@ -49,20 +49,30 @@
 #undef ip_len
 #endif
 
+// 阻塞模式建立向外的tcp连接
 int anetTcpConnect(char *err, char *addr, int port);
+// 非阻塞模式建立向外的tcp连接
 int anetTcpNonBlockConnect(char *err, char *addr, int port);
+// <source_addr> 指定本地的地址
 int anetTcpNonBlockBindConnect(char *err, char *addr, int port, char *source_addr);
+// 如果绑定本地指定的地址失败时，则尝试自由获取本地地址
 int anetTcpNonBlockBestEffortBindConnect(char *err, char *addr, int port, char *source_addr);
+// 阻塞式连接unix socket
 int anetUnixConnect(char *err, char *path);
+// 非阻塞
 int anetUnixNonBlockConnect(char *err, char *path);
+// 内部持续调用系统调用read，直到读满<count>字节或发生错误
 int anetRead(int fd, char *buf, int count);
+// 解析服务名
 int anetResolve(char *err, char *host, char *ipbuf, size_t ipbuf_len);
 int anetResolveIP(char *err, char *host, char *ipbuf, size_t ipbuf_len);
+// 创建socket并listen
 int anetTcpServer(char *err, int port, char *bindaddr, int backlog);
 int anetTcp6Server(char *err, int port, char *bindaddr, int backlog);
 int anetUnixServer(char *err, char *path, mode_t perm, int backlog);
 int anetTcpAccept(char *err, int serversock, char *ip, size_t ip_len, int *port);
 int anetUnixAccept(char *err, int serversock);
+// 内部持续调用系统调用write，直到写满<count>字节或发生错误
 int anetWrite(int fd, char *buf, int count);
 int anetNonBlock(char *err, int fd);
 int anetBlock(char *err, int fd);

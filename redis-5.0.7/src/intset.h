@@ -33,8 +33,8 @@
 #include <stdint.h>
 
 typedef struct intset {
-    uint32_t encoding;
-    uint32_t length;
+    uint32_t encoding; // 单个元素的编码规格，可以是2字节，4字节，8字节，具体大小由最大元素的取值范围决定
+    uint32_t length; // 元素个数
     int8_t contents[];
 } intset;
 

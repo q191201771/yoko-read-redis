@@ -62,6 +62,9 @@
 #ifndef __ATOMIC_VAR_H
 #define __ATOMIC_VAR_H
 
+// 原子操作，通过宏封装平台提供的原子操作接口，如果无原子操作接口可用，则退化使用互斥锁
+// 注意，外部使用前必须定义一个变量名加上_mutex后缀的互斥量变量，因为如果退化成互斥锁方式，内部会直接通过传入的变量名，拼接一个互斥量变量使用
+
 /* To test Redis with Helgrind (a Valgrind tool) it is useful to define
  * the following macro, so that __sync macros are used: those can be detected
  * by Helgrind (even if they are less efficient) so that no false positive

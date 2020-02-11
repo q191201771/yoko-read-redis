@@ -109,6 +109,7 @@ typedef struct aeEventLoop {
 } aeEventLoop;
 
 /* Prototypes */
+// <setsize> 最大连接数量
 aeEventLoop *aeCreateEventLoop(int setsize);
 void aeDeleteEventLoop(aeEventLoop *eventLoop);
 void aeStop(aeEventLoop *eventLoop);
